@@ -34,8 +34,8 @@ function odstraniNedovoljeneTage(sporocilo) {
 function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
-  sporocilo = dodajSlike(sporocilo);
   sporocilo = dodajVideo(sporocilo);
+  sporocilo = dodajSlike(sporocilo);
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
@@ -172,13 +172,14 @@ function dodajSmeske(vhodnoBesedilo) {
 
 
 function dodajSlike(vhodnoBesedilo) {
+  var vhodnoBesediloArr = vhodnoBesedilo.split(" ");
   
-  if (vhodnoBesedilo.charAt(0) == '/') {
+  if (vhodnoBesedilo.charAt(0) == '/' && vhodnoBesediloArr[0] != "/dregljaj") {
     var arr = vhodnoBesedilo.split("\"");
     vhodnoBesedilo = arr[0]+"\""+arr[1]+"\""+"  \" "+arr[3]+" \"";
   }
   
-  var vhodnoBesediloArr = vhodnoBesedilo.split(" ");
+  vhodnoBesediloArr = vhodnoBesedilo.split(" ");
   var urlRegex = /(http:\/\/|https:\/\/).*(.gif|.png|.jpg)$/;
   
   
@@ -192,13 +193,14 @@ function dodajSlike(vhodnoBesedilo) {
 
 
 function dodajVideo(vhodnoBesedilo) {
+  var vhodnoBesediloArr = vhodnoBesedilo.split(" ");
   
-  if (vhodnoBesedilo.charAt(0) == '/') {
+  if (vhodnoBesedilo.charAt(0) == '/' && vhodnoBesediloArr[0] != "/dregljaj") {
     var arr = vhodnoBesedilo.split("\"");
     vhodnoBesedilo = arr[0]+"\""+arr[1]+"\""+"  \" "+arr[3]+" \"";
   }
   
-  var vhodnoBesediloArr = vhodnoBesedilo.split(" ");
+  vhodnoBesediloArr = vhodnoBesedilo.split(" ");
   var urlRegex = /^https:\/\/www.youtube.com\/watch\?v=/;
   
   
