@@ -4,7 +4,8 @@ function divElementEnostavniTekst(sporocilo) {
     sporocilo = sporocilo.replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />');
     return $('<div style="font-weight: bold"></div>').html(sporocilo);
   } else {
-    return $('<div style="font-weight: bold;"></div>').text(sporocilo);
+    sporocilo = odstraniNedovoljeneTage(sporocilo);
+    return $('<div style="font-weight: bold;"></div>').html(sporocilo);
   }
 }
 
@@ -12,9 +13,25 @@ function divElementHtmlTekst(sporocilo) {
   return $('<div></div>').html('<i>' + sporocilo + '</i>');
 }
 
+function odstraniNedovoljeneTage(sporocilo) {
+  var tagRegex = /<.*>/gi;
+  var najdeniTagi = sporocilo.match(tagRegex);
+  
+  if (najdeniTagi) {
+    for (var i = 0; i < najdeniTagi.length; i++) {
+      if (najdeniTagi[i].indexOf("img") == -1 && najdeniTagi[i].indexOf("iframe") == -1) {
+        sporocilo = sporocilo.replace(najdeniTagi[i], "");
+      }
+    }
+  }
+    
+  return sporocilo;
+}
+
 function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
+  sporocilo = dodajVideo(sporocilo);
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
@@ -130,4 +147,28 @@ function dodajSmeske(vhodnoBesedilo) {
       preslikovalnaTabela[smesko] + "' />");
   }
   return vhodnoBesedilo;
+}
+
+
+function dodajVideo(vhodnoBesedilo) {
+  
+  if (vhodnoBesedilo.charAt(0) == '/') {
+    var arr = vhodnoBesedilo.split("\"");
+    vhodnoBesedilo = arr[0]+"\""+arr[1]+"\""+"  \" "+arr[3]+" \"";
+  }
+  
+  var vhodnoBesediloArr = vhodnoBesedilo.split(" ");
+  var urlRegex = /^https:\/\/www.youtube.com\/watch\?v=/;
+  
+  
+  for (var beseda in vhodnoBesediloArr) {
+      var video = vhodnoBesediloArr[beseda].match(urlRegex, "");
+      if (video) {
+        video = vhodnoBesediloArr[beseda].replace(urlRegex, "");
+        vhodnoBesediloArr[beseda] = "<iframe src='https://www.youtube.com/embed/"+video+"' allowfullscreen></iframe>";
+      }
+      
+  }
+  
+  return vhodnoBesediloArr.join(" ");
 }
