@@ -11,6 +11,11 @@ function divElementEnostavniTekst(sporocilo) {
 }
 
 
+
+function divElementHtmlTekst(sporocilo) {
+  return $('<div></div>').html('<i>' + sporocilo + '</i>');
+}
+
 function odstraniNedovoljeneTage(sporocilo) {
   var tagRegex = /<.*>/gi;
   var najdeniTagi = sporocilo.match(tagRegex);
@@ -26,14 +31,11 @@ function odstraniNedovoljeneTage(sporocilo) {
   return sporocilo;
 }
 
-function divElementHtmlTekst(sporocilo) {
-  return $('<div></div>').html('<i>' + sporocilo + '</i>');
-}
-
 function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
   sporocilo = dodajSlike(sporocilo);
+  sporocilo = dodajVideo(sporocilo);
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
@@ -172,6 +174,31 @@ function dodajSlike(vhodnoBesedilo) {
   
   for (var beseda in vhodnoBesediloArr) {
       vhodnoBesediloArr[beseda] = vhodnoBesediloArr[beseda].replace(urlRegex, "<img src='\$&' class='slika'/>");
+  }
+  
+  return vhodnoBesediloArr.join(" ");
+}
+
+
+
+function dodajVideo(vhodnoBesedilo) {
+  
+  if (vhodnoBesedilo.charAt(0) == '/') {
+    var arr = vhodnoBesedilo.split("\"");
+    vhodnoBesedilo = arr[0]+"\""+arr[1]+"\""+"  \" "+arr[3]+" \"";
+  }
+  
+  var vhodnoBesediloArr = vhodnoBesedilo.split(" ");
+  var urlRegex = /^https:\/\/www.youtube.com\/watch\?v=/;
+  
+  
+  for (var beseda in vhodnoBesediloArr) {
+      var video = vhodnoBesediloArr[beseda].match(urlRegex, "");
+      if (video) {
+        video = vhodnoBesediloArr[beseda].replace(urlRegex, "");
+        vhodnoBesediloArr[beseda] = "<iframe src='https://www.youtube.com/embed/"+video+"' allowfullscreen></iframe>";
+      }
+      
   }
   
   return vhodnoBesediloArr.join(" ");
