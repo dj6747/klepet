@@ -1,11 +1,29 @@
 function divElementEnostavniTekst(sporocilo) {
   var jeSmesko = sporocilo.indexOf('http://sandbox.lavbic.net/teaching/OIS/gradivo/') > -1;
+  
   if (jeSmesko) {
     sporocilo = sporocilo.replace(/\</g, '&lt;').replace(/\>/g, '&gt;').replace('&lt;img', '<img').replace('png\' /&gt;', 'png\' />');
     return $('<div style="font-weight: bold"></div>').html(sporocilo);
   } else {
-    return $('<div style="font-weight: bold;"></div>').text(sporocilo);
+    sporocilo = odstraniNedovoljeneTage(sporocilo);
+    return $('<div style="font-weight: bold;"></div>').html(sporocilo);
   }
+}
+
+
+function odstraniNedovoljeneTage(sporocilo) {
+  var tagRegex = /<.*>/gi;
+  var najdeniTagi = sporocilo.match(tagRegex);
+  
+  if (najdeniTagi) {
+    for (var i = 0; i < najdeniTagi.length; i++) {
+      if (najdeniTagi[i].indexOf("img") == -1 && najdeniTagi[i].indexOf("iframe") == -1) {
+        sporocilo = sporocilo.replace(najdeniTagi[i], "");
+      }
+    }
+  }
+    
+  return sporocilo;
 }
 
 function divElementHtmlTekst(sporocilo) {
@@ -15,6 +33,7 @@ function divElementHtmlTekst(sporocilo) {
 function procesirajVnosUporabnika(klepetApp, socket) {
   var sporocilo = $('#poslji-sporocilo').val();
   sporocilo = dodajSmeske(sporocilo);
+  sporocilo = dodajSlike(sporocilo);
   var sistemskoSporocilo;
 
   if (sporocilo.charAt(0) == '/') {
@@ -130,4 +149,23 @@ function dodajSmeske(vhodnoBesedilo) {
       preslikovalnaTabela[smesko] + "' />");
   }
   return vhodnoBesedilo;
+}
+
+
+function dodajSlike(vhodnoBesedilo) {
+  
+  if (vhodnoBesedilo.charAt(0) == '/') {
+    var arr = vhodnoBesedilo.split("\"");
+    vhodnoBesedilo = arr[0]+"\""+arr[1]+"\""+"  \" "+arr[3]+" \"";
+  }
+  
+  var vhodnoBesediloArr = vhodnoBesedilo.split(" ");
+  var urlRegex = /(http:\/\/|https:\/\/).*(.gif|.png|.jpg)$/;
+  
+  
+  for (var beseda in vhodnoBesediloArr) {
+      vhodnoBesediloArr[beseda] = vhodnoBesediloArr[beseda].replace(urlRegex, "<img src='\$&' class='slika'/>");
+  }
+  
+  return vhodnoBesediloArr.join(" ");
 }
